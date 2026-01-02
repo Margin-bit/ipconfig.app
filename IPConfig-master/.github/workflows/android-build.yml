@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Android APK
 
 on: [push, workflow_dispatch]
 
@@ -7,20 +7,29 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Debug - Show directory structure
+      run: |
+        echo "=== 目录结构 ==="
+        find . -type f -name "gradlew" 2>/dev/null
+        echo "=== 列出所有 ==="
+        ls -la
+        echo "=== 子目录 ==="
+        ls -la IPConfig-master/
     
     - name: Build APK
+      working-directory: ./IPConfig-master  # 关键：进入子目录
       run: |
-        # 打印调试信息
-        echo "工作目录：$(pwd)"
-        echo "检查gradlew："
-        [ -f "gradlew" ] && echo "gradlew存在" || echo "gradlew不存在"
-        
-        # 构建
+        echo "当前工作目录：$(pwd)"
+        echo "gradlew文件："
+        ls -la gradlew
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
         
-    - uses: actions/upload-artifact@v3
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
       with:
-        name: app-debug-apk
-        path: app/build/outputs/apk/debug/*.apk
+        name: ipconfig-app
+        path: IPConfig-master/app/build/outputs/apk/debug/*.apk  # 注意路径
