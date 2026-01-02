@@ -1,42 +1,23 @@
-name: Build Android APK
+name: Build APK
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    # 1. 检出代码
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    # 2. 设置JDK 11
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
+    - uses: actions/checkout@v3
+    
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
       with:
-        java-version: '11'
-        distribution: 'temurin'
+        gradle-version: '7.6'
         
-    # 3. 给gradlew执行权限
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    # 4. 构建APK
     - name: Build with Gradle
-      run: |
-        ./gradlew assembleDebug
-        echo "APK构建完成！"
-        
-    # 5. 上传APK供下载
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v3
+      run: gradle assembleDebug
+      
+    - uses: actions/upload-artifact@v3
       with:
-        name: ipconfig-app
+        name: app-debug-apk
         path: app/build/outputs/apk/debug/*.apk
-        retention-days: 7
